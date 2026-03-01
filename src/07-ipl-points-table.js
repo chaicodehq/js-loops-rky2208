@@ -36,6 +36,76 @@
  *   // RCB: played=1, tied=1, points=1
  *   // Sorted: CSK(3), RCB(1), MI(0)
  */
-export function iplPointsTable(matches) {
-  // Your code here
+export  function iplPointsTable(matches) {
+  // Validation
+  if (!Array.isArray(matches) || matches.length === 0) {
+    return [];
+  }
+
+  const table = {};
+
+  for (let i = 0; i < matches.length; i++) {
+    const { team1, team2, result, winner } = matches[i];
+
+    // Initialize teams if not present
+    if (!table[team1]) {
+      table[team1] = {
+        team: team1,
+        played: 0,
+        won: 0,
+        lost: 0,
+        tied: 0,
+        noResult: 0,
+        points: 0,
+      };
+    }
+
+    if (!table[team2]) {
+      table[team2] = {
+        team: team2,
+        played: 0,
+        won: 0,
+        lost: 0,
+        tied: 0,
+        noResult: 0,
+        points: 0,
+      };
+    }
+
+    // Increase matches played
+    table[team1].played++;
+    table[team2].played++;
+
+    if (result === "win") {
+      table[winner].won++;
+      table[winner].points += 2;
+
+      const loser = winner === team1 ? team2 : team1;
+      table[loser].lost++;
+    } 
+    else if (result === "tie") {
+      table[team1].tied++;
+      table[team2].tied++;
+      table[team1].points += 1;
+      table[team2].points += 1;
+    } 
+    else if (result === "no_result") {
+      table[team1].noResult++;
+      table[team2].noResult++;
+      table[team1].points += 1;
+      table[team2].points += 1;
+    }
+  }
+
+  const resultArray = Object.values(table);
+
+  // Sort: points DESC, team name ASC
+  resultArray.sort((a, b) => {
+    if (b.points !== a.points) {
+      return b.points - a.points;
+    }
+    return a.team.localeCompare(b.team);
+  });
+
+  return resultArray;
 }

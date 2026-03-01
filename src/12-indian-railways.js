@@ -45,5 +45,85 @@
  *   // => [{ name: "Rahul", trainNumber: "12345", class: "sleeper", status: "confirmed" }]
  */
 export function railwayReservation(passengers, trains) {
-  // Your code here
+  if (
+    !Array.isArray(passengers) ||
+    !Array.isArray(trains) ||
+    passengers.length === 0 ||
+    trains.length === 0
+  ) {
+    return [];
+  }
+
+  const results = [];
+
+  // Process passengers FIFO
+  for (let i = 0; i < passengers.length; i++) {
+    const passenger = passengers[i];
+    const { name, trainNumber, preferred, fallback } = passenger;
+
+    let trainFound = false;
+    let allocationDone = false;
+
+    // Find matching train (nested loop)
+    for (let j = 0; j < trains.length; j++) {
+      if (trains[j].trainNumber === trainNumber) {
+        trainFound = true;
+        const train = trains[j];
+
+        // Try preferred class
+        if (
+          train.seats[preferred] !== undefined &&
+          train.seats[preferred] > 0
+        ) {
+          train.seats[preferred]--;
+          results.push({
+            name,
+            trainNumber,
+            class: preferred,
+            status: "confirmed",
+          });
+          allocationDone = true;
+        }
+        // Try fallback class
+        else if (
+          train.seats[fallback] !== undefined &&
+          train.seats[fallback] > 0
+        ) {
+          train.seats[fallback]--;
+          results.push({
+            name,
+            trainNumber,
+            class: fallback,
+            status: "confirmed",
+          });
+          allocationDone = true;
+        }
+
+        // Waitlist
+        else {
+          results.push({
+            name,
+            trainNumber,
+            class: preferred,
+            status: "waitlisted",
+          });
+          allocationDone = true;
+        }
+
+        break; // stop searching trains
+      }
+    }
+
+    // Train not found
+    if (!trainFound) {
+      results.push({
+        name,
+        trainNumber,
+        class: null,
+        status: "train_not_found",
+      });
+    }
+  }
+
+  return results;
 }
